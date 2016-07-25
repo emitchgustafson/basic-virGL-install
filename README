@@ -1,0 +1,56 @@
+xen-virgl-install README
+
+run ./install
+-will prompt for sudo password
+-the vm will boot with a fedora iso the first time. Install fedora and run
+	-dnf copr enable kraxel/virgl
+	-dnf update
+
+This script:
+-sets up network bridge for xen
+-install dependicies
+-set up file system xen,virgl,adn qemu in home directory. Will put xen-disks in root.
+-Download xen from git
+-install xen
+-Download virglrender from git
+-install virglrenderer
+-download most recent qemu
+-install/build qemu with SDL 2.0, openGL, GTK, and virGLrenderer enabled
+-updates grub
+-install xen-utils (4.6 version but it does the trick)
+	-this updates grub and files system for various thing to make xen run smothly
+-makes script to run on start so xl works from boot
+
+---------------Current known problems--------------------------------------------
+
+PROBLEM: networking bridge isnt working
+FIX:
+	-if script was run multiple times check for and delete repeated text in the following:
+                /etc/network/interfaces
+                /etc/fstab
+
+PROBLEM: sometimes the git clones can freeze up
+FIX:
+	-wait longer....
+	IF STILL BROKEN
+	-comment out git clones for xen,virglrenderer,qemu
+	-manually git clone these into home directory
+	-if git freezes again crtl-c and retry
+        -when all folders have been cloned re-run script with git commented out
+	-depending how far script got you might want to delete the repeated text in:
+		/etc/network/interfaces
+		/etc/fstab
+ 
+PROBLEM:if username isnt "user" the qemu path in the cfg wil need to be changed
+FIX:
+	-manually go into /etc/xen/gfedora.cfg
+	-change: device_model_override = "/home/user/qemu-2.6.0/x86_64-softmmu/qemu-system-x86_64"
+	-to: device_model_override = "/home/<username>/qemu-2.6.0/x86_64-softmmu/qemu-system-x86_64"
+
+------------------------TO DO------------------------------------------------------
+-only append files if xen, virgl, and qemu installed
+-append .cfg in script to reflect username?
+
+
+------------------------For help---------------------------------------------------
+gustafsone@ainfosec.com
