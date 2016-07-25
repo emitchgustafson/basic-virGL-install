@@ -37,16 +37,8 @@ FIX:
 
 PROBLEM: sometimes the git clones can freeze up
 FIX:
-	-wait longer....
-	IF STILL BROKEN
-	-comment out git clones for xen,virglrenderer,qemu
-	-manually git clone these into home directory
-	-if git freezes again crtl-c and retry
-        -when all folders have been cloned re-run script with git commented out
-	-depending how far script got you might want to delete the repeated text in:
-		/etc/network/interfaces
-		/etc/fstab
- 
+	-ctrl-c and restart script. Nothing else happens untill all downloads comlete 
+
 PROBLEM:if username isnt "user" the qemu path in the cfg wil need to be changed
 FIX:
 	-manually go into /etc/xen/gfedora.cfg
@@ -56,6 +48,7 @@ FIX:
 ------------------------TO DO------------------------------------------------------
 -only append files if xen, virgl, and qemu installed
 -append .cfg in script to reflect username?
+-check if files are there before downloading
 
 
 ------------------------For help---------------------------------------------------
