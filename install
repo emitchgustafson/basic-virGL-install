@@ -3,6 +3,21 @@
 sudo apt-get update
 sudo apt-get upgrade
 
+#install dependicies for rest of install
+echo "Installing dependicies:"
+sudo apt-get install git bin86 bcc python-dev iasl uuid-dev libcurses-ocaml-dev libperl-dev libgtk2.0-dev libaio-dev libyajl-dev bison git libc6-dev-i386 texinfo libsdl2-dev libssl-dev mesa-common-dev libepoxy-dev libdrm-dev libgbm-dev xen-utils-common autotools-dev autoconf libtool -y
+
+cd /
+mkdir xen-disks
+cd /xen-disks
+wget https://download.fedoraproject.org/pub/fedora/linux/releases/24/Workstation/x86_64/iso/Fedora-Workstation-netinst-x86_64-24-1.2.iso
+
+cd ~/
+git clone git://xenbits.xen.org/xen.git
+git clone git://git.qemu.org/qemu.git
+git clone git://people.freedesktop.org/~airlied/virglrenderer
+
+
 echo "Seting Up bridged network connection"
 #Determine which network interface to use
 ETHER=$(ip addr | grep 2: | grep -o "e.*:" | cut -d ":" -f 1 -)
@@ -28,27 +43,14 @@ sudo chmod 644 /etc/network/interfaces
 #restert network interfaces
 sudo systemctl restart networking
 
-#install dependicies for rest of install
-echo "Installing dependicies:"
-sudo apt-get install git bin86 bcc python-dev iasl uuid-dev libcurses-ocaml-dev libperl-dev libgtk2.0-dev libaio-dev libyajl-dev bison git libc6-dev-i386 texinfo libsdl2-dev libssl-dev mesa-common-dev libepoxy-dev libdrm-dev libgbm-dev xbfdt-dev xen-utils-common -y
-
-echo "Copying Files, This could take a while, >10min if using HDD"
-
-cd /
-mkdir xen-disks
-cd xen-disks
-wget https://download.fedoraproject.org/pub/fedora/linux/releases/24/Workstation/x86_64/iso/Fedora-Workstation-netinst-x86_64-24-1.2.iso
+cd /xen-disks
 dd if=/dev/zero of="fedora(24)-disk-1.img" bs=1M count=10000
 
 
 #install xen
 echo""
-echo "Installing xen from git"
+echo "Installing xen"
 echo""
-
-cd ~/
-
-git clone git://xenbits.xen.org/xen.git
 
 cd ~/xen/
 ./configure 
@@ -62,11 +64,8 @@ sudo chmod 644 /etc/fstab
 
 #install virGL - could use some fine tuning
 echo""
-echo "Installing most recent virglrenderer from git"
+echo "Installing virglrenderer"
 echo""
-sudo apt-get install autotools-dev autoconf libtool -y
-cd ~/
-git clone git://people.freedesktop.org/~airlied/virglrenderer
 cd ~/virglrenderer/
 aclocal 
 libtoolize
@@ -82,12 +81,9 @@ sudo make install
 
 #install qemu
 echo""
-echo "Installing most recent qemu from git"
+echo "Installing qemu"
 echo""
-cd ~/
-git clone git://git.qemu.org/qemu.git
 cd ~/qemu/
-
 ./configure --enable-gtk --enable-sdl --with-sdlabi=2.0 --enable-opengl --enable-virglrenderer
 make
 sudo make install
