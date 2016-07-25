@@ -1,12 +1,16 @@
 xen-virgl-install README
 
+-------------Intalling-----------------------------------------------------
+tested on Ubuntu 16.04
+
 run ./install
 -will prompt for sudo password
--the vm will boot with a fedora iso the first time. Install fedora and run
+-the vm will boot with the fedora iso the first time. Install fedora and reboot VM
+-in VM run:
 	-dnf copr enable kraxel/virgl
 	-dnf update
 
-This script:
+what this script does:
 -sets up network bridge for xen
 -install dependicies
 -set up file system xen,virgl,adn qemu in home directory. Will put xen-disks in root.
@@ -19,7 +23,9 @@ This script:
 -updates grub
 -install xen-utils (4.6 version but it does the trick)
 	-this updates grub and files system for various thing to make xen run smothly
--makes script to run on start so xl works from boot
+-downloads and setups fedora 24 iso
+-make .img disk image for VM
+-makes script to run xen on start so xl works from boot
 
 ---------------Current known problems--------------------------------------------
 
