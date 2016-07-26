@@ -9,6 +9,7 @@ sudo apt-get install git bin86 bcc python-dev iasl uuid-dev libcurses-ocaml-dev 
 
 sudo mkdir /xen-disks
 sudo chmod 777 /xen-disks
+sudo cp gfedora.cfg /etc/xen/gfedora.cfg
 cd /xen-disks
 wget https://download.fedoraproject.org/pub/fedora/linux/releases/24/Workstation/x86_64/iso/Fedora-Workstation-netinst-x86_64-24-1.2.iso
 
