@@ -7,8 +7,8 @@ sudo apt-get upgrade
 echo "Installing dependicies:"
 sudo apt-get install git bin86 bcc python-dev iasl uuid-dev libcurses-ocaml-dev libperl-dev libgtk2.0-dev libaio-dev libyajl-dev bison git libc6-dev-i386 texinfo libsdl2-dev libssl-dev mesa-common-dev libepoxy-dev libdrm-dev libgbm-dev xen-utils-common autotools-dev autoconf libtool libfdt-dev -y
 
-cd /
-mkdir xen-disks
+sudo mkdir /xen-disks
+sudo chmod 777 /xen-disks
 cd /xen-disks
 wget https://download.fedoraproject.org/pub/fedora/linux/releases/24/Workstation/x86_64/iso/Fedora-Workstation-netinst-x86_64-24-1.2.iso
 
