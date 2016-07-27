@@ -160,6 +160,8 @@ fi
 if [ "$(cat /etc/xen/gfedora.cfg | grep -o  ^device_model_override)" == "" ]
 then
    UNAME=$(whoami)
-   echo 'device_model_override = "/home/'$UNAME'/qemu/x86_64-softmmu/qemu-system-x86_64"' >> /gfedora.cfg
+   sudo chmod 777 /etc/xen/gfedora.cfg
+   echo 'device_model_override = "/home/'$UNAME'/qemu/x86_64-softmmu/qemu-system-x86_64"' >> /etc/xen/gfedora.cfg
+   sudo chmod 644 /etc/xen/gfedora.cfg
 fi
 
