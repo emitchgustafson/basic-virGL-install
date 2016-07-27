@@ -1,74 +1,115 @@
 #!/bin/bash
 
-sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get update -y
+sudo apt-get upgrade -y
 
 #install dependicies for rest of install
 echo "Installing dependicies:"
 sudo apt-get install git bin86 bcc python-dev iasl uuid-dev libcurses-ocaml-dev libperl-dev libgtk2.0-dev libaio-dev libyajl-dev bison git libc6-dev-i386 texinfo libsdl2-dev libssl-dev mesa-common-dev libepoxy-dev libdrm-dev libgbm-dev xen-utils-common autotools-dev autoconf libtool libfdt-dev -y
 
-sudo mkdir /xen-disks
-sudo chmod 777 /xen-disks
-UNAME=$(whoami)
-echo 'device_model_override = "/home/'$UNAME'/qemu/x86_64-softmmu/qemu-system-x86_64"' >> gfedora.cfg
-sudo cp gfedora.cfg /etc/xen/gfedora.cfg
+sudo cp gfedora.cfg /gfedora.cfg
+
+if !  [ -a /xen-disks ]
+then
+   sudo mkdir /xen-disks
+   sudo chmod 777 /xen-disks
+else
+   echo "-----xen-disks already exsists"
+fi
+
 cd /xen-disks
-wget https://download.fedoraproject.org/pub/fedora/linux/releases/24/Workstation/x86_64/iso/Fedora-Workstation-netinst-x86_64-24-1.2.iso
+
+if ! [ -a Fedora-Workstation-netinst-x86_64-24-1.2.iso ]
+then
+   wget https://download.fedoraproject.org/pub/fedora/linux/releases/24/Workstation/x86_64/iso/Fedora-Workstation-netinst-x86_64-24-1.2.iso
+else
+   echo "-----Fedora .iso already exsists"
+fi
+
+if ! [ -a fedora24-disk-1.img ]
+then
+   dd if=/dev/zero of="fedora24-disk-1.img" bs=1M count=10000
+else
+   echo "-----guest .img already exsists"
+fi
 
 cd ~/
-git clone git://xenbits.xen.org/xen.git
-git clone git://git.qemu.org/qemu.git
-git clone git://people.freedesktop.org/~airlied/virglrenderer
 
+if ! [ -a xen ]
+then
+   git clone git://xenbits.xen.org/xen.git
+else
+   echo "-----xen folder already exsists"
+fi
 
-echo "Seting Up bridged network connection"
-#Determine which network interface to use
-ETHER=$(ip addr | grep 2: | grep -o "e.*:" | cut -d ":" -f 1 -)
+if ! [ -a qemu ]
+then
+   git clone git://git.qemu.org/qemu.git
+else
+   echo "-----qemu folder already exsists"
+fi
 
-#Install bridge utils
-sudo  apt-get install bridge-utils -y
+if ! [ -a virglrenderer ]
+then
+   git clone git://people.freedesktop.org/~airlied/virglrenderer
+else
+   echo "-----virglrenderer folder already exsists"
+fi
 
-#modify network interfaces
-sudo chmod 777 /etc/network/interfaces
+if [ "$(cat /etc/network/interfaces | grep -o  xenbr0)" == "" ]
+then
 
-echo "" >> /etc/network/interfaces
-echo "auto $ETHER" >> /etc/network/interfaces
-echo "iface $ETHER inet manual" >> /etc/network/interfaces
-echo "" >> /etc/network/interfaces
+   echo "Seting Up bridged network connection"
+   #Determine which network interface to use
+   ETHER=$(ip addr | grep 2: | grep -o "e.*:" | cut -d ":" -f 1 -)
 
-echo "auto xenbr0" >> /etc/network/interfaces
-echo "iface xenbr0 inet dhcp" >> /etc/network/interfaces
-echo "bridge_ports $ETHER" >> /etc/network/interfaces
-echo "" >> /etc/network/interfaces
+   #Install bridge utils
+   sudo  apt-get install bridge-utils -y
 
-sudo chmod 644 /etc/network/interfaces
+   #modify network interfaces
+   sudo chmod 777 /etc/network/interfaces
 
-#restert network interfaces
-sudo systemctl restart networking
+   echo "" >> /etc/network/interfaces
+   echo "auto $ETHER" >> /etc/network/interfaces
+   echo "iface $ETHER inet manual" >> /etc/network/interfaces
+   echo "" >> /etc/network/interfaces
 
-cd /xen-disks
-dd if=/dev/zero of="fedora(24)-disk-1.img" bs=1M count=10000
+   echo "auto xenbr0" >> /etc/network/interfaces
+   echo "iface xenbr0 inet dhcp" >> /etc/network/interfaces
+   echo "bridge_ports $ETHER" >> /etc/network/interfaces
+   echo "" >> /etc/network/interfaces
+
+   sudo chmod 644 /etc/network/interfaces
+
+   #restert network interfaces
+   sudo systemctl restart networking
+
+else   
+   echo "-----network bridge already setup"
+fi
 
 
 #install xen
-echo""
-echo "Installing xen"
-echo""
-
+echo "-----Installing xen"
 cd ~/xen/
 ./configure 
 make 
 sudo make install 
 
-#modify fstab
-sudo chmod 777 /etc/fstab
-echo "none /proc/xen xenfs defaults 00" >> /etc/fstab
-sudo chmod 644 /etc/fstab
+if [ "$(cat /etc/fstab | grep -o  xenfs)" == "" ]
+then
+
+   #modify fstab
+   sudo chmod 777 /etc/fstab
+   echo "none /proc/xen xenfs defaults 00" >> /etc/fstab
+   sudo chmod 644 /etc/fstab
+
+else
+   echo "-----fstab already modified"
+fi
 
 #install virGL - could use some fine tuning
-echo""
-echo "Installing virglrenderer"
-echo""
+echo "-----Installing virglrenderer"
 cd ~/virglrenderer/
 aclocal 
 libtoolize
@@ -83,9 +124,7 @@ make
 sudo make install 
 
 #install qemu
-echo""
-echo "Installing qemu"
-echo""
+echo "-----Installing qemu"
 cd ~/qemu/
 ./configure --enable-gtk --enable-sdl --with-sdlabi=2.0 --enable-opengl --enable-virglrenderer
 make
@@ -93,18 +132,34 @@ sudo make install
 
 #update grub
 sudo update-grub
-#move cfg file to xen folder
-sudo cp -rf /gfedora.cfg /etc/xen/gfedora.cfg
 #check for updates
 sudo apt-get update -y
 sudo apt-get upgrade -y
 #install xenutils
 sudo apt-get install xen-utils-4.6 -y
 
-#setup script to run on boot to start xencommons
-echo "#!/bin/bash" > startXen
-echo "sudo etc/init.d/xencommons start" >> startXen
-sudo chmod ugo+x startXen
-sudo mv startXen /etc/init.d/startXen
-sudo update-rc.d startXen defaults
+if ! [ -a /etc/init.d/startXen ]
+then
+   #setup script to run on boot to start xencommons
+   echo "#!/bin/bash" > startXen
+   echo "sudo etc/init.d/xencommons start" >> startXen
+   sudo chmod ugo+x startXen
+   sudo mv startXen /etc/init.d/startXen
+   sudo update-rc.d startXen defaults
+else
+   echo "xen start upscript already created"
+fi
+
+if ! [ -a /etc/xen/gfedora.cfg ]
+then
+   sudo rm /gfedora.cfg
+else
+   sudo cp /gfedora.cfg /etc/xen/gfedora.cfg
+fi
+
+if [ "$(cat /etc/xen/gfedora.cfg | grep -o  ^device_model_override)" == "" ]
+then
+   UNAME=$(whoami)
+   echo 'device_model_override = "/home/'$UNAME'/qemu/x86_64-softmmu/qemu-system-x86_64"' >> /gfedora.cfg
+fi
 
