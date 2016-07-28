@@ -150,7 +150,7 @@ else
    echo "xen start upscript already created"
 fi
 
-if ! [ -a /etc/xen/gfedora.cfg ]
+if [ -a /etc/xen/gfedora.cfg ]
 then
    sudo rm /gfedora.cfg
 else
