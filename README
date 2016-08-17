@@ -27,29 +27,5 @@ what this script does:
 -make .img disk image for VM
 -makes script to run xen on start so xl works from boot
 
----------------Current known problems--------------------------------------------
-
-PROBLEM: networking bridge isnt working
-FIX:
-	-if script was run multiple times check for and delete repeated text in the following:
-                /etc/network/interfaces
-                /etc/fstab
-
-PROBLEM: sometimes the git clones can freeze up
-FIX:
-	-ctrl-c and restart script. Nothing else happens untill all downloads comlete 
-
-PROBLEM:if username isnt "user" the qemu path in the cfg wil need to be changed
-FIX:
-	-manually go into /etc/xen/gfedora.cfg
-	-change: device_model_override = "/home/user/qemu-2.6.0/x86_64-softmmu/qemu-system-x86_64"
-	-to: device_model_override = "/home/<username>/qemu-2.6.0/x86_64-softmmu/qemu-system-x86_64"
-
-------------------------TO DO------------------------------------------------------
--only append files if xen, virgl, and qemu installed
--append .cfg in script to reflect username?
--check if files are there before downloading
-
-
 ------------------------For help---------------------------------------------------
 gustafsone@ainfosec.com
